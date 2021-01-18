@@ -1,2 +1,2 @@
-include ':map'
+include ':library-map'
 rootProject.name = "map"
