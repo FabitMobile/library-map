@@ -1,7 +1,7 @@
 package ru.fabit.map.internal.data
 
-import ru.fabit.localstorage.LocalStorageService
 import ru.fabit.map.internal.domain.entity.QuadKey
+import ru.fabit.map.internal.domain.entity.storage.LocalStorageService
 
 class QuadKeyRepository(private val localStorageService: LocalStorageService) {
 
