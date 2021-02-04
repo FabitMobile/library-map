@@ -1,5 +1,6 @@
 package ru.fabit.map.api
 
+import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import ru.fabit.map.internal.domain.listener.*
@@ -32,6 +33,18 @@ interface MapApi {
     fun onStart(parentView: View)
 
     fun onStop()
+
+    fun onDestroy()
+
+    fun onPause()
+
+    fun onCreate(savedInstanceState: Bundle?)
+
+    fun onLowMemory()
+
+    fun onResume()
+
+    fun onSaveInstanceState(outState: Bundle)
 
     fun clearCache(id: String)
 
@@ -135,6 +148,5 @@ interface MapApi {
     //endregion
 
     //endregion
-
 
 }

@@ -1,6 +1,7 @@
 package ru.fabit.map.api.internal
 
 import android.graphics.Rect
+import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import ru.fabit.map.api.MapApi
@@ -138,6 +139,30 @@ internal class MapApiImpl(
 
     override fun onStop() {
         mapProtocol.stop()
+    }
+
+    override fun onDestroy() {
+        mapProtocol.destroy()
+    }
+
+    override fun onPause() {
+        mapProtocol.pause()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        mapProtocol.create(savedInstanceState)
+    }
+
+    override fun onLowMemory() {
+        mapProtocol.onLowMemory()
+    }
+
+    override fun onResume() {
+        mapProtocol.resume()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        mapProtocol.saveInstanceState(outState)
     }
 
     override fun clearCache(id: String) {

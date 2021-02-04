@@ -1,5 +1,6 @@
 package ru.fabit.map.internal.protocol
 
+import android.os.Bundle
 import android.view.View
 import ru.fabit.map.internal.domain.listener.*
 import ru.fabit.map.internal.domain.entity.MapCoordinates
@@ -37,6 +38,10 @@ interface MapProtocol {
     fun clearCache(id: String)
 
     fun updateVersionCache(time: String)
+
+    fun destroy()
+
+    fun create(savedInstanceState: Bundle?)
 
     //region ===================== Listener ======================
 
@@ -147,4 +152,8 @@ interface MapProtocol {
     fun setAnimationMarkerListener(animationMarkerListener: AnimationMarkerListener)
 
     fun setStyle(style: String)
+    fun resume()
+    fun pause()
+    fun saveInstanceState(outState: Bundle)
+    fun onLowMemory()
 }

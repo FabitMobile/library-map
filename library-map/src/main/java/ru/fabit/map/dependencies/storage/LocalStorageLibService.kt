@@ -1,6 +1,6 @@
-package ru.fabit.map.internal.domain.entity.storage
+package ru.fabit.map.dependencies.storage
 
-interface LocalStorageService {
+interface LocalStorageLibService {
 
     fun getData(key: String, defaultValue: String): String
 
