@@ -11,132 +11,132 @@ import ru.fabit.map.internal.domain.entity.MapBounds
 
 interface MapProtocol {
 
-    fun isDebugMode(): Boolean
+    fun isDebugMode(): Boolean = false
 
-    fun setDebugMode(isDebug: Boolean)
+    fun setDebugMode(isDebug: Boolean) {}
 
-    fun setPayableZones(payableZones: List<String>)
+    fun setPayableZones(payableZones: List<String>) {}
 
-    fun setUniqueColorForComParking(uniqueColorForComParking: Boolean)
+    fun setUniqueColorForComParking(uniqueColorForComParking: Boolean) {}
 
-    fun createGeoJsonLayer()
+    fun createGeoJsonLayer() {}
 
-    fun disableMap()
+    fun disableMap() {}
 
-    fun enableMap()
+    fun enableMap() {}
 
-    fun init(style: String)
+    fun init(style: String) {}
 
-    fun start(parentView: View)
+    fun start(parentView: View) {}
 
-    fun stop()
+    fun stop() {}
 
-    fun getMapView(): View?
+    fun getMapView(): View? = null
 
-    fun setFocusRect(topLeftX: Float, topLeftY: Float, bottomRightX: Float, bottomRightY: Float)
+    fun setFocusRect(topLeftX: Float, topLeftY: Float, bottomRightX: Float, bottomRightY: Float) {}
 
-    fun clearCache(id: String)
+    fun clearCache(id: String) {}
 
-    fun updateVersionCache(time: String)
+    fun updateVersionCache(time: String) {}
 
-    fun destroy()
+    fun destroy() {}
 
-    fun create(savedInstanceState: Bundle?)
+    fun create(savedInstanceState: Bundle?) {}
 
     //region ===================== Listener ======================
 
     //region ===================== VisibleMapRegionListener ======================
 
-    fun addVisibleMapRegionListener(visibleMapRegionListener: VisibleMapRegionListener)
+    fun addVisibleMapRegionListener(visibleMapRegionListener: VisibleMapRegionListener) {}
 
-    fun removeVisibleRegionListeners()
+    fun removeVisibleRegionListeners() {}
 
-    fun removeVisibleRegionListener(visibleMapRegionListener: VisibleMapRegionListener)
+    fun removeVisibleRegionListener(visibleMapRegionListener: VisibleMapRegionListener) {}
 
     //endregion
 
     //region ===================== VisibleMapRegionListener ======================
 
-    fun addMapListener(mapListener: MapListener)
+    fun addMapListener(mapListener: MapListener) {}
 
-    fun removeMapListeners()
+    fun removeMapListeners() {}
 
-    fun removeMapListener(mapListener: MapListener)
+    fun removeMapListener(mapListener: MapListener) {}
 
     //endregion
 
     //region ===================== MapLocationListener ======================
 
-    fun addMapLocationListener(mapLocationListener: MapLocationListener)
+    fun addMapLocationListener(mapLocationListener: MapLocationListener) {}
 
-    fun removeMapLocationListeners()
+    fun removeMapLocationListeners() {}
 
-    fun removeMapLocationListener(mapLocationListener: MapLocationListener)
+    fun removeMapLocationListener(mapLocationListener: MapLocationListener) {}
 
     //endregion
 
     //region ===================== LayoutChangeListener ======================
 
-    fun addLayoutChangeListener(layoutChangeListener: View.OnLayoutChangeListener)
+    fun addLayoutChangeListener(layoutChangeListener: View.OnLayoutChangeListener) {}
 
-    fun removeLayoutChangeListeners()
+    fun removeLayoutChangeListeners() {}
 
-    fun removeLayoutChangeListener(layoutChangeListener: View.OnLayoutChangeListener)
+    fun removeLayoutChangeListener(layoutChangeListener: View.OnLayoutChangeListener) {}
 
     //endregion
 
     //region ===================== SizeChangeListener ======================
 
-    fun addSizeChangeListener(sizeChangeListener: SizeChangeListener)
+    fun addSizeChangeListener(sizeChangeListener: SizeChangeListener) {}
 
-    fun removeSizeChangeListeners()
+    fun removeSizeChangeListeners() {}
 
-    fun removeSizeChangeListener(sizeChangeListener: SizeChangeListener)
-
-    //endregion
-
+    fun removeSizeChangeListener(sizeChangeListener: SizeChangeListener) {}
 
     //endregion
 
 
-    fun drawQuad(key: String, rect: Rect, color: Int)
+    //endregion
 
-    fun enableLocation(enable: Boolean?)
 
-    @JvmSuppressWildcards
-    fun insert(markers: List<Marker>, zoom: Float)
+    fun drawQuad(key: String, rect: Rect, color: Int) {}
 
-    @JvmSuppressWildcards
-    fun remove(markers: List<Marker>)
+    fun enableLocation(enable: Boolean?) {}
 
     @JvmSuppressWildcards
-    fun update(markers: List<Marker>, zoom: Float)
+    fun insert(markers: List<Marker>, zoom: Float) {}
 
-    fun moveCameraPosition(latitude: Double, longitude: Double)
+    @JvmSuppressWildcards
+    fun remove(markers: List<Marker>) {}
 
-    fun moveCameraPositionWithZoom(latitude: Double, longitude: Double, zoom: Float)
+    @JvmSuppressWildcards
+    fun update(markers: List<Marker>, zoom: Float) {}
 
-    fun moveCameraPositionWithBounds(mapBounds: MapBounds)
+    fun moveCameraPosition(latitude: Double, longitude: Double) {}
 
-    fun moveCameraZoomAndPosition(latitude: Double, longitude: Double, zoom: Float)
+    fun moveCameraPositionWithZoom(latitude: Double, longitude: Double, zoom: Float) {}
 
-    fun moveToUserLocation(defaultCoordinates: MapCoordinates? = null)
+    fun moveCameraPositionWithBounds(mapBounds: MapBounds) {}
 
-    fun moveToUserLocation(zoom: Float, defaultCoordinates: MapCoordinates? = null)
+    fun moveCameraZoomAndPosition(latitude: Double, longitude: Double, zoom: Float) {}
+
+    fun moveToUserLocation(defaultCoordinates: MapCoordinates? = null) {}
+
+    fun moveToUserLocation(zoom: Float, defaultCoordinates: MapCoordinates? = null) {}
 
     fun tryMoveToUserLocation(
         zoom: Float,
         defaultCoordinates: MapCoordinates,
         mapCallback: MapCallback
-    )
+    ) {}
 
-    fun deselect(markerToDeselect: Marker)
+    fun deselect(markerToDeselect: Marker) {}
 
-    fun selectMarker(markerToSelect: Marker)
+    fun selectMarker(markerToSelect: Marker) {}
 
-    fun zoomIn()
+    fun zoomIn() {}
 
-    fun zoomOut()
+    fun zoomOut() {}
 
     fun getVisibleRegionByZoomAndPoint(zoom: Float, latitude: Double, longitude: Double): MapBounds
 
@@ -145,15 +145,15 @@ interface MapProtocol {
         isRadarOn: Boolean,
         isColoredMarkersEnabled: Boolean,
         markers: Collection<Marker>
-    )
+    ) {}
 
-    fun onDisabledChange(isDisabledOn: Boolean)
+    fun onDisabledChange(isDisabledOn: Boolean) {}
 
-    fun setAnimationMarkerListener(animationMarkerListener: AnimationMarkerListener)
+    fun setAnimationMarkerListener(animationMarkerListener: AnimationMarkerListener) {}
 
-    fun setStyle(style: String)
-    fun resume()
-    fun pause()
-    fun saveInstanceState(outState: Bundle)
-    fun onLowMemory()
+    fun setStyle(style: String) {}
+    fun resume() {}
+    fun pause() {}
+    fun saveInstanceState(outState: Bundle) {}
+    fun onLowMemory() {}
 }
