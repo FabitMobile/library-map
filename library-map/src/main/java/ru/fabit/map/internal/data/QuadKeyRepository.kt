@@ -1,9 +1,9 @@
 package ru.fabit.map.internal.data
 
 import ru.fabit.map.internal.domain.entity.QuadKey
-import ru.fabit.map.internal.domain.entity.storage.LocalStorageService
+import ru.fabit.map.dependencies.storage.LocalStorageLibService
 
-class QuadKeyRepository(private val localStorageService: LocalStorageService) {
+class QuadKeyRepository(private val localStorageService: LocalStorageLibService) {
 
     companion object {
         const val VERSION_CODE_CURRENT = "1"
