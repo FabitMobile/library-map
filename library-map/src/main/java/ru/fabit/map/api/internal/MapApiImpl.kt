@@ -134,7 +134,7 @@ internal class MapApiImpl(
                 parentView.addView(mapProtocol.getMapView(), 0)
             }
         }
-        mapProtocol.start(parentView)
+        mapProtocol.start()
     }
 
     override fun onStop() {
@@ -142,6 +142,7 @@ internal class MapApiImpl(
     }
 
     override fun onDestroy() {
+        markers.clear()
         mapProtocol.destroy()
     }
 
