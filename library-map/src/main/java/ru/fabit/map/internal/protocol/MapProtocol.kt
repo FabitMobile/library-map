@@ -27,7 +27,7 @@ interface MapProtocol {
 
     fun init(style: String) {}
 
-    fun start(parentView: View) {}
+    fun start() {}
 
     fun stop() {}
 
