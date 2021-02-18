@@ -5,5 +5,5 @@ import ru.fabit.map.internal.domain.entity.MapBounds
 
 interface GeoJsonFactory {
 
-    fun createGeoJson(mapBounds: MapBounds): ByteArray
+    fun createGeoJsonString(mapBounds: MapBounds): String
 }
