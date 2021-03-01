@@ -2,7 +2,7 @@ package ru.fabit.map.internal.domain.entity.marker
 
 import ru.fabit.map.internal.domain.entity.Location
 
-class MarkerData(
+data class MarkerData(
     val id: Int,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
@@ -20,5 +20,6 @@ class MarkerData(
     val minPrice: Int?,
     val maxPrice: Int?,
     val handicapped: Int?,
-    val ratio: Int?
+    val ratio: Int?,
+    val timeStampParkOut: Long? = -1L
 )

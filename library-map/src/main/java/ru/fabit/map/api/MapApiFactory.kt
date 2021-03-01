@@ -7,9 +7,15 @@ import ru.fabit.map.internal.protocol.MapProtocol
 class MapApiFactory {
 
     companion object {
-        fun create(mapProtocol: MapProtocol): MapApi {
+        fun create(
+            mapProtocol: MapProtocol,
+            getCurrentTime: () -> Long,
+            cleanParkOutDate: (ids: List<Int>?) -> Unit
+        ): MapApi {
             return MapApiImpl(
-                mapProtocol
+                mapProtocol,
+                getCurrentTime,
+                cleanParkOutDate
             )
         }
     }
