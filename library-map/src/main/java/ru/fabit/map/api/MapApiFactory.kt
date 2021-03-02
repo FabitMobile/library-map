@@ -10,12 +10,14 @@ class MapApiFactory {
         fun create(
             mapProtocol: MapProtocol,
             getCurrentTime: () -> Long,
-            cleanParkOutDate: (ids: List<Int>?) -> Unit
+            cleanParkOutDate: (ids: List<Int>?) -> Unit,
+            settings: MapApiSettings
         ): MapApi {
             return MapApiImpl(
                 mapProtocol,
                 getCurrentTime,
-                cleanParkOutDate
+                cleanParkOutDate,
+                settings
             )
         }
     }
