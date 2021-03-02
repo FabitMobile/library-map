@@ -156,5 +156,5 @@ interface MapProtocol {
     fun pause() {}
     fun saveInstanceState(outState: Bundle) {}
     fun onLowMemory() {}
-    fun radarStatus(): Boolean
+    fun isAnimatedMarkersEnabled(): Boolean
 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import ru.fabit.map.api.MapApi
+import ru.fabit.map.api.MapApiSettings
 import ru.fabit.map.internal.domain.entity.*
 import ru.fabit.map.internal.domain.entity.marker.*
 import ru.fabit.map.internal.domain.listener.*
@@ -18,17 +19,14 @@ import java.util.concurrent.TimeUnit
 internal class MapApiImpl(
     private val mapProtocol: MapProtocol,
     private val getCurrentTime: () -> Long,
-    private val cleanParkOutDate: (ids: List<Int>?) -> Unit
+    private val cleanParkOutDate: (ids: List<Int>?) -> Unit,
+    private val mapApiSettings: MapApiSettings
 ) : MapApi, AnimationMarkerListener {
 
     private var idObjectForSelected: Int? = null
-    private val DEFAULT_MARKER_ZOOM = 17f
-    private val MINI_MARKER_ZOOM = 16f
     private val selectedMarkers: MutableMap<String, Marker>
     private val markers: MutableMap<String, Marker>
     private val pinIntersector: PinIntersector
-    private val DELAY_ANIMATION_MARKER_MAX = TimeUnit.SECONDS.toMillis(10)
-    private val ZOOM_VISIBLE_ANIMATION_MARKER = 17f
 
     init {
         this.pinIntersector = PinIntersector()
@@ -182,7 +180,7 @@ internal class MapApiImpl(
         val newMarkers = HashMap<String, Marker>()
         val animMarkers = HashMap<String, Marker>()
         inputMarkers.forEach {
-            if (currentZoom < DEFAULT_MARKER_ZOOM && currentZoom >= MINI_MARKER_ZOOM && it.type == MarkerType.DEFAULT) {
+            if (currentZoom < mapApiSettings.DEFAULT_MARKER_ZOOM && currentZoom >= mapApiSettings.MINI_MARKER_ZOOM && it.type == MarkerType.DEFAULT) {
                 it.type = MarkerType.SMALL
             }
             newMarkers[it.id] = it
@@ -210,7 +208,7 @@ internal class MapApiImpl(
 
         val markerAnimations = HashMap<String, AnimationMarker>()
 
-        if (mapProtocol.radarStatus() && currentZoom >= ZOOM_VISIBLE_ANIMATION_MARKER) {
+        if (mapProtocol.isAnimatedMarkersEnabled() && currentZoom >= mapApiSettings.ZOOM_VISIBLE_ANIMATION_MARKER) {
             for (marker in markers) {
 
                 val mapItem = marker.data as MarkerData
@@ -272,42 +270,38 @@ internal class MapApiImpl(
             val point1 = Point(lines[0].latitude, lines[0].longitude)
             val point2 = Point(lines[1].latitude, lines[1].longitude)
 
-            val animationMarker =
-                createAnimationMarkerVehicleLeaving(marker, mapItem, point1, point2)
+            val animationMarker = createAnimationMarkerImpl(marker, mapItem, point1, point2)
             markerAnimations[animationMarker.id] = animationMarker
         }
     }
 
-    private fun createAnimationMarkerVehicleLeaving(
+    private fun createAnimationMarkerImpl(
         marker: Marker,
         mapItem: MarkerData,
         lineA: Point,
         lineB: Point
     ): AnimationMarker {
-        val DURATION_VEHICLE_LEAVING_ANIMATION = TimeUnit.SECONDS.toMillis(7)
-        val COUNT_LOOP_VEHICLE_LEAVING_ANIMATION = 1
-
         var x = (lineA.longitude + lineB.longitude) / 2
         var y = (lineA.latitude + lineB.latitude) / 2
 
         x = (x + lineB.longitude) / 2
         y = (y + lineB.latitude) / 2
         val animationMarkerType =
-            AnimationMarkerType.VEHICLE_LEAVING
+            AnimationMarkerType.ANIMATED
         val markerAnimation = AnimationMarker(
             marker.id + animationMarkerType.toString(),
             y,
             x
         )
         markerAnimation.animationMarkerType =
-            AnimationMarkerType.VEHICLE_LEAVING
+            AnimationMarkerType.ANIMATED
         markerAnimation.data = mapItem
         markerAnimation.type = MarkerType.ANIMATION
-        markerAnimation.countLoop = COUNT_LOOP_VEHICLE_LEAVING_ANIMATION
-        markerAnimation.duration = DURATION_VEHICLE_LEAVING_ANIMATION
+        markerAnimation.countLoop = mapApiSettings.COUNT_LOOP_ANIMATION
+        markerAnimation.duration = mapApiSettings.DURATION_ANIMATION
 
         val leftLimit = 0L
-        val rightLimit = DELAY_ANIMATION_MARKER_MAX
+        val rightLimit = mapApiSettings.DELAY_ANIMATION_MARKER_MAX
         val generatedLong = leftLimit + (Math.random() * (rightLimit - leftLimit)).toLong()
 
         markerAnimation.delay = generatedLong
