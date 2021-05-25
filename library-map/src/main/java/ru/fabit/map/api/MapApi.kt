@@ -2,11 +2,11 @@ package ru.fabit.map.api
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import ru.fabit.map.internal.domain.listener.*
+import ru.fabit.map.dependencies.provider.MapStyleProvider
 import ru.fabit.map.internal.domain.entity.MapBounds
 import ru.fabit.map.internal.domain.entity.MapCoordinates
 import ru.fabit.map.internal.domain.entity.marker.Marker
+import ru.fabit.map.internal.domain.listener.*
 import ru.fabit.map.internal.domain.pinintersection.MapRegion
 import ru.fabit.map.internal.domain.pinintersection.items.BaseMapElement
 
@@ -56,7 +56,7 @@ interface MapApi {
 
     fun selectMapObject(id: Int?)
 
-    fun selectMarker(marker: Marker?, deselectingCurrent: Boolean)
+    fun selectMarker(marker: Marker?)
 
     fun centerAtCoordinate(latitude: Double, longitude: Double)
 
@@ -94,6 +94,8 @@ interface MapApi {
     )
 
     fun onDisabledChange(isDisabledOn: Boolean)
+
+    fun getMapStyleProvider(): MapStyleProvider?
 
     //region ===================== listeners ======================
 
@@ -144,6 +146,7 @@ interface MapApi {
     fun removeSizeChangeListeners()
 
     fun removeSizeChangeListener(sizeChangeListener: SizeChangeListener)
+    fun centerAtCoordinateWithDefaultCenterCityZoom(latitude: Double, longitude: Double)
 
     //endregion
 

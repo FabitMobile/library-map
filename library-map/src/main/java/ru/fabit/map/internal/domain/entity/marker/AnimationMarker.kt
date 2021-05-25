@@ -10,5 +10,6 @@ constructor(id: String,
             var countLoop: Int = 0,
             var animationIcon: Any? = null,
             var animationMarkerState: AnimationMarkerState = AnimationMarkerState.HIDEN,
-            var animationMarkerType: AnimationMarkerType = AnimationMarkerType.UNKNOWN
+            var animationMarkerType: AnimationMarkerType = AnimationMarkerType.UNKNOWN,
+            var showAnimation: Boolean = true
 ) : Marker(id, latitude, longitude)

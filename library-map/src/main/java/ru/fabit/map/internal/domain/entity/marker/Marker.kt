@@ -19,4 +19,8 @@ open class Marker(
     fun removeRelativeObjects() {
         relativeObjects.clear()
     }
+
+    override fun toString(): String {
+        return "[Marker id=$id, state=$state, type=$type]"
+    }
 }

@@ -20,6 +20,6 @@ data class MarkerData(
     val minPrice: Int?,
     val maxPrice: Int?,
     val handicapped: Int?,
-    val ratio: Int?,
+    val percentFreeSpaces: Int?,
     val timeStampParkOut: Long? = -1L
 )

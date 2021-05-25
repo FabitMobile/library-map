@@ -6,7 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import ru.fabit.map.api.MapApi
 import ru.fabit.map.api.MapApiSettings
-import ru.fabit.map.internal.domain.entity.*
+import ru.fabit.map.api.ValidCongestionChecker
+import ru.fabit.map.internal.domain.entity.Location
+import ru.fabit.map.internal.domain.entity.MapBounds
+import ru.fabit.map.internal.domain.entity.MapCoordinates
+import ru.fabit.map.internal.domain.entity.Point
 import ru.fabit.map.internal.domain.entity.marker.*
 import ru.fabit.map.internal.domain.listener.*
 import ru.fabit.map.internal.domain.pinintersection.MapRegion
@@ -20,17 +24,18 @@ internal class MapApiImpl(
     private val mapProtocol: MapProtocol,
     private val getCurrentTime: () -> Long,
     private val cleanParkOutDate: (ids: List<Int>?) -> Unit,
-    private val mapApiSettings: MapApiSettings
+    private val mapApiSettings: MapApiSettings,
+    private val validCongestionChecker: ValidCongestionChecker
 ) : MapApi, AnimationMarkerListener {
 
     private var idObjectForSelected: Int? = null
-    private val selectedMarkers: MutableMap<String, Marker>
+    private var selectedMarker: Marker? = null
     private val markers: MutableMap<String, Marker>
     private val pinIntersector: PinIntersector
+    private var currentZoom: Float? = null
 
     init {
         this.pinIntersector = PinIntersector()
-        this.selectedMarkers = HashMap()
         this.markers = HashMap()
         this.mapProtocol.setAnimationMarkerListener(this)
     }
@@ -116,6 +121,8 @@ internal class MapApiImpl(
         mapProtocol.onDisabledChange(isDisabledOn)
     }
 
+    override fun getMapStyleProvider() = mapProtocol.getMapStyleProvider()
+
     override fun init(style: String) {
         mapProtocol.init(style)
     }
@@ -145,6 +152,12 @@ internal class MapApiImpl(
     }
 
     override fun onDestroy() {
+        val parent = mapProtocol.getMapView()?.parent
+        parent?.let {
+            if (it is ViewGroup) {
+                it.removeView(mapProtocol.getMapView())
+            }
+        }
         mapProtocol.destroy()
     }
 
@@ -177,6 +190,7 @@ internal class MapApiImpl(
     }
 
     override fun setMarkers(inputMarkers: List<Marker>, currentZoom: Float) {
+        this.currentZoom = currentZoom
         val newMarkers = HashMap<String, Marker>()
         val animMarkers = HashMap<String, Marker>()
         inputMarkers.forEach {
@@ -185,17 +199,19 @@ internal class MapApiImpl(
             }
             newMarkers[it.id] = it
 
-            if (it.state == MarkerState.SELECTED) {
-                selectedMarkers[it.id] = it
-                selectMarker(it, true)
-            }
-
             animMarkers.putAll(
                 createAnimationMarker(newMarkers.values, currentZoom)
             )
         }
+        selectedMarker?.let { selected ->
+            newMarkers.filter { it.value.data?.id == selected.data?.id }
+                .map { it.value.state = MarkerState.SELECTED }
+        }
+        val allNewMarkers =
+            mutableMapOf(*newMarkers.toList().toTypedArray(), *animMarkers.toList().toTypedArray())
+        this.mapProtocol.onMarkersUpdated(markers, allNewMarkers, currentZoom)
+        this.cleanParkOutDate(markers, allNewMarkers)
 
-        calculateDiff(markers, mapOf(*newMarkers.toList().toTypedArray(), *animMarkers.toList().toTypedArray() ), currentZoom)
         this.markers.clear()
         this.markers.putAll(newMarkers)
         idObjectForSelected?.let { selectMapObject(it) }
@@ -205,19 +221,15 @@ internal class MapApiImpl(
         markers: Collection<Marker>,
         currentZoom: Float
     ): Map<String, AnimationMarker> {
-
+        this.currentZoom = currentZoom
         val markerAnimations = HashMap<String, AnimationMarker>()
 
         if (mapProtocol.isAnimatedMarkersEnabled() && currentZoom >= mapApiSettings.ZOOM_VISIBLE_ANIMATION_MARKER) {
             for (marker in markers) {
 
                 val mapItem = marker.data as MarkerData
-                val loadMapItem =
-                    LoadMapItem.valueOf(
-                        mapItem
-                    )
 
-                if (loadMapItem != LoadMapItem.UNKNOWN || loadMapItem != LoadMapItem.LOW) {
+                if (validCongestionChecker.checkValidCongestion(mapItem.percentFreeSpaces)) {
                     if (mapItem.timeStampParkOut != null && mapItem.timeStampParkOut != 0L
                         && getCurrentTime() - mapItem.timeStampParkOut < TimeUnit.MINUTES.toMillis(
                             1
@@ -309,37 +321,40 @@ internal class MapApiImpl(
     }
 
     override fun deselectAll() {
-        for (selectedMarker in selectedMarkers.values) {
-            selectedMarker.state =
-                MarkerState.DEFAULT
-            if (selectedMarker.type != MarkerType.ANIMATION) {
-                this.mapProtocol.deselect(selectedMarker)
+        selectedMarker?.let {
+            markers[it.id]?.state = MarkerState.DEFAULT
+            it.state = MarkerState.DEFAULT
+            if (it.type != MarkerType.ANIMATION) {
+                this.mapProtocol.deselect(it)
             }
         }
-        selectedMarkers.clear()
+        selectedMarker = null
     }
 
     override fun selectMapObject(id: Int?) {
         if (id != null) {
             idObjectForSelected = id
+            var selectMarker: Marker? = null
             for (marker in markers.values) {
                 val newMapItem = marker.data
                 if (newMapItem?.id == id) {
-                    selectMarker(marker, true)
-                    mapProtocol.moveCameraPosition(marker.latitude, marker.longitude)
+                    selectMarker = marker
                 }
+            }
+            selectMarker?.let {
+                selectMarker(it)
+                mapProtocol.moveCameraPosition(it.latitude, it.longitude)
             }
         }
     }
 
-    override fun selectMarker(marker: Marker?, deselectingCurrent: Boolean) {
+    override fun selectMarker(marker: Marker?) {
         if (marker != null && marker.type != MarkerType.ANIMATION) {
-            if (deselectingCurrent) {
-                deselectAll()
-            }
+            deselectAll()
             marker.state = MarkerState.SELECTED
+            markers[marker.id] = marker
+            selectedMarker = marker
             this.mapProtocol.selectMarker(marker)
-            this.selectedMarkers[marker.id] = marker
             idObjectForSelected = null
         }
     }
@@ -479,72 +494,33 @@ internal class MapApiImpl(
         mapProtocol.removeSizeChangeListener(sizeChangeListener)
     }
 
+    override fun centerAtCoordinateWithDefaultCenterCityZoom(latitude: Double, longitude: Double) {
+        mapProtocol.moveCameraPositionWithZoom(
+            latitude,
+            longitude,
+            mapApiSettings.DEFAULT_CITY_CENTER_ZOOM
+        )
+    }
+
     //endregion
 
     //endregion
 
     //region ===================== Internal logic ======================
 
-    private fun calculateDiff(
+    private fun cleanParkOutDate(
         oldMarkers: MutableMap<String, Marker>,
-        newMarkers: Map<String, Marker>,
-        zoom: Float
+        newMarkers: Map<String, Marker>
     ) {
-        val toAdd = ArrayList<Marker>()
-        val toRemove = ArrayList<Marker>()
-        val toUpdate = ArrayList<Marker>()
         val cleanParkingIdsParkOut = ArrayList<Int>()
-
-        searchIntersectionNewInOld(oldMarkers, newMarkers, toAdd, toUpdate)
-
-        searchIntersectionOldInNew(oldMarkers, newMarkers, toRemove, cleanParkingIdsParkOut)
-
-        if (toRemove.count() > 0) {
-            toRemove.forEach {
-                oldMarkers.remove(it.id)
-            }
-            mapProtocol.remove(toRemove)
-        }
-
-        if (toAdd.count() > 0) {
-            toAdd.forEach {
-                oldMarkers.put(it.id, it)
-            }
-            mapProtocol.insert(toAdd, zoom)
-        }
-
-        if (toUpdate.count() > 0) {
-            toUpdate.forEach {
-                oldMarkers[it.id] = it
-            }
-            mapProtocol.update(toUpdate, zoom)
-        }
-
-        if (cleanParkingIdsParkOut.size > 0) {
-            cleanParkOutDate(cleanParkingIdsParkOut)
-        }
-    }
-
-    private fun searchIntersectionOldInNew(
-        oldMarkers: Map<String, Marker>,
-        newMarkers: Map<String, Marker>,
-        toRemove: MutableList<Marker>,
-        cleanParkingIdsParkOut: MutableList<Int>
-    ) {
         for ((key, value) in oldMarkers) {
 
             val mapObjectToRemove = newMarkers[key]
             if (mapObjectToRemove == null) {
                 if (value.type == MarkerType.ANIMATION) {
                     cleanParkingIdsParkOut.add((value.data as MarkerData).id)
-                } else {
-                    toRemove.add(value)
                 }
             } else {
-                val markerTypeEquals = mapObjectToRemove.type == value.type
-                if (!markerTypeEquals) {
-                    toRemove.add(value)
-                }
                 if (mapObjectToRemove.type == MarkerType.ANIMATION) {
                     val removeAnimationMarker = mapObjectToRemove as AnimationMarker?
 
@@ -552,43 +528,14 @@ internal class MapApiImpl(
                         removeAnimationMarker?.animationMarkerState == AnimationMarkerState.STOP
 
                     if (markerAnimationStop) {
-                        toRemove.add(value)
                         cleanParkingIdsParkOut.add((value.data as MarkerData).id)
                     }
                 }
             }
         }
-    }
 
-    private fun searchIntersectionNewInOld(
-        oldMarkers: Map<String, Marker>,
-        newMarkers: Map<String, Marker>,
-        toAdd: MutableList<Marker>,
-        toUpdate: MutableList<Marker>
-    ) {
-        for ((key, value) in newMarkers) {
-
-            val mapObjectToAdd = oldMarkers[key]
-
-            if (mapObjectToAdd == null) {
-                toAdd.add(value)
-            } else {
-
-                val oldData = mapObjectToAdd.data
-                val newData = value.data
-
-                val areEquals = oldData?.freeSpaces == newData?.freeSpaces
-
-                if (!areEquals) {
-                    toUpdate.add(value)
-                }
-
-                val markerTypeEquals = mapObjectToAdd.type == value.type
-                if (!markerTypeEquals) {
-                    toAdd.add(value)
-                }
-
-            }
+        if (cleanParkingIdsParkOut.size > 0) {
+            cleanParkOutDate(cleanParkingIdsParkOut)
         }
     }
 

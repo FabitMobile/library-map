@@ -1,6 +1,5 @@
 package ru.fabit.map.api
 
-import ru.fabit.map.api.MapApi
 import ru.fabit.map.api.internal.MapApiImpl
 import ru.fabit.map.internal.protocol.MapProtocol
 
@@ -11,13 +10,15 @@ class MapApiFactory {
             mapProtocol: MapProtocol,
             getCurrentTime: () -> Long,
             cleanParkOutDate: (ids: List<Int>?) -> Unit,
-            settings: MapApiSettings
+            settings: MapApiSettings,
+            validCongestionChecker: ValidCongestionChecker
         ): MapApi {
             return MapApiImpl(
                 mapProtocol,
                 getCurrentTime,
                 cleanParkOutDate,
-                settings
+                settings,
+                validCongestionChecker
             )
         }
     }

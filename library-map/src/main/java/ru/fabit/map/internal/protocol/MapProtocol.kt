@@ -2,6 +2,7 @@ package ru.fabit.map.internal.protocol
 
 import android.os.Bundle
 import android.view.View
+import ru.fabit.map.dependencies.provider.MapStyleProvider
 import ru.fabit.map.internal.domain.listener.*
 import ru.fabit.map.internal.domain.entity.MapCoordinates
 import ru.fabit.map.internal.domain.entity.marker.Marker
@@ -42,6 +43,8 @@ interface MapProtocol {
     fun destroy() {}
 
     fun create(savedInstanceState: Bundle?) {}
+
+    fun getMapStyleProvider(): MapStyleProvider? = null
 
     //region ===================== Listener ======================
 
@@ -103,14 +106,11 @@ interface MapProtocol {
 
     fun enableLocation(enable: Boolean?) {}
 
-    @JvmSuppressWildcards
-    fun insert(markers: List<Marker>, zoom: Float) {}
-
-    @JvmSuppressWildcards
-    fun remove(markers: List<Marker>) {}
-
-    @JvmSuppressWildcards
-    fun update(markers: List<Marker>, zoom: Float) {}
+    fun onMarkersUpdated(
+        oldMarkers: MutableMap<String, Marker>,
+        newMarkers: MutableMap<String, Marker>,
+        zoom: Float
+    )
 
     fun moveCameraPosition(latitude: Double, longitude: Double) {}
 
@@ -128,7 +128,8 @@ interface MapProtocol {
         zoom: Float,
         defaultCoordinates: MapCoordinates,
         mapCallback: MapCallback
-    ) {}
+    ) {
+    }
 
     fun deselect(markerToDeselect: Marker) {}
 
@@ -145,7 +146,8 @@ interface MapProtocol {
         isRadarOn: Boolean,
         isColoredMarkersEnabled: Boolean,
         markers: Collection<Marker>
-    ) {}
+    ) {
+    }
 
     fun onDisabledChange(isDisabledOn: Boolean) {}
 
