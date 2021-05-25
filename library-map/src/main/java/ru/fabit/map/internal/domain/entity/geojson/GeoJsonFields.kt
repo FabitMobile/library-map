@@ -10,7 +10,6 @@ val GEOMETRY = "geometry"
 val COORDINATES = "coordinates"
 
 val PROPERTIES = "properties"
-
 val FEATURE_COLLECTION = "FeatureCollection"
 val FEATURE = "Feature"
 

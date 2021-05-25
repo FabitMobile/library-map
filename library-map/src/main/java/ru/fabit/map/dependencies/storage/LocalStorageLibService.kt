@@ -6,6 +6,10 @@ interface LocalStorageLibService {
 
     fun saveData(key: String, value: String)
 
+    fun getData(key: String, defaultValue: Boolean): Boolean
+
+    fun saveData(key: String, value: Boolean)
+
     fun remove(key: String)
 
     fun <K, V>getMap(key: String, keyClass: Class<*>, valueClass: Class<*>): HashMap<K, V>
