@@ -159,4 +159,5 @@ interface MapProtocol {
     fun saveInstanceState(outState: Bundle) {}
     fun onLowMemory() {}
     fun isAnimatedMarkersEnabled(): Boolean
+    fun drawPolygon(coordinates: List<MapCoordinates>)
 }

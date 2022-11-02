@@ -17,7 +17,6 @@ import ru.fabit.map.internal.domain.pinintersection.MapRegion
 import ru.fabit.map.internal.domain.pinintersection.PinIntersector
 import ru.fabit.map.internal.domain.pinintersection.items.BaseMapElement
 import ru.fabit.map.internal.protocol.MapProtocol
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 internal class MapApiImpl(
@@ -78,7 +77,7 @@ internal class MapApiImpl(
     override fun disableMap(parentView: View) {
         if (parentView is ViewGroup) {
             for (i in 0..parentView.childCount) {
-                if (parentView.getChildAt(i) == mapProtocol.getMapView()) {
+                if (parentView.getChildAt(i) != null && parentView.getChildAt(i) == mapProtocol.getMapView()) {
                     parentView.removeViewAt(i)
                 }
             }
@@ -190,6 +189,7 @@ internal class MapApiImpl(
     }
 
     override fun setMarkers(inputMarkers: List<Marker>, currentZoom: Float) {
+        val curMarkers = markers.toMutableMap()
         this.currentZoom = currentZoom
         val newMarkers = HashMap<String, Marker>()
         val animMarkers = HashMap<String, Marker>()
@@ -209,7 +209,7 @@ internal class MapApiImpl(
         }
         val allNewMarkers =
             mutableMapOf(*newMarkers.toList().toTypedArray(), *animMarkers.toList().toTypedArray())
-        this.mapProtocol.onMarkersUpdated(markers, allNewMarkers, currentZoom)
+        this.mapProtocol.onMarkersUpdated(curMarkers, allNewMarkers.toMutableMap(), currentZoom)
         this.cleanParkOutDate(markers, allNewMarkers)
 
         this.markers.clear()
@@ -471,7 +471,7 @@ internal class MapApiImpl(
     }
 
     override fun removeLayoutChangeListeners() {
-        mapProtocol.removeMapLocationListeners()
+        mapProtocol.removeLayoutChangeListeners()
     }
 
     override fun removeLayoutChangeListener(layoutChangeListener: View.OnLayoutChangeListener) {
@@ -500,6 +500,10 @@ internal class MapApiImpl(
             longitude,
             mapApiSettings.DEFAULT_CITY_CENTER_ZOOM
         )
+    }
+
+    override fun drawPolygon(coordinates: List<MapCoordinates>) {
+        mapProtocol.drawPolygon(coordinates)
     }
 
     //endregion

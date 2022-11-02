@@ -152,4 +152,6 @@ interface MapApi {
 
     //endregion
 
+    fun drawPolygon(coordinates: List<MapCoordinates>)
+
 }

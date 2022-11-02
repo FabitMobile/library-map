@@ -6,14 +6,14 @@ plugins {
 group = 'com.github.FabitMobile'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 31
+    buildToolsVersion "31.0.0"
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 30
-        versionCode 7
-        versionName "3.0.1-beta.1"
+        minSdkVersion 21
+        targetSdkVersion 31
+        versionCode 8
+        versionName "3.0.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
