@@ -1,6 +1,6 @@
 package ru.fabit.map.internal.domain.pinintersection;
 
-import java.util.ArrayList;
+import                                                                                                                                                  java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +36,19 @@ public class PinIntersector {
 
         double pinRegMinLat = point.getLatitude() - centerSide2;
         double pinRegMaxLat = point.getLatitude() + centerSide2;
+
+        MapRegion pinReg = new MapRegion(pinRegMinLat, pinRegMaxLat, pinRegMinLon, pinRegMaxLon);
+
+        return pinReg;
+    }
+
+    public MapRegion pinRegionByPoint(MapCoordinates point, double regionSizeCoefficient) {
+
+        double pinRegMinLon = point.getLongitude() - regionSizeCoefficient;
+        double pinRegMaxLon = point.getLongitude() + regionSizeCoefficient;
+
+        double pinRegMinLat = point.getLatitude() - regionSizeCoefficient;
+        double pinRegMaxLat = point.getLatitude() + regionSizeCoefficient;
 
         MapRegion pinReg = new MapRegion(pinRegMinLat, pinRegMaxLat, pinRegMinLon, pinRegMaxLon);
 
@@ -182,7 +195,7 @@ public class PinIntersector {
             WorldCoordinate worldCoordinate = marker.getCoordinate();
 
             Marker userData = (Marker) marker.getUserData();
-            MapRegion markerRegion = this.markerPinRegion(worldCoordinate, mapRegion, userData.getIconWidth(), userData.getIconWidth(), screenWidth, screenHeight);
+            MapRegion markerRegion = markerPinRegion(worldCoordinate, mapRegion, userData.getIconWidth(), userData.getIconWidth(), screenWidth, screenHeight);
 
             if (pinRegion.intersects(markerRegion)) {
                 result = marker;
@@ -225,7 +238,7 @@ public class PinIntersector {
      *
      */
 
-    private MapPolyline searchInPolylines(List<MapPolyline> polylines, MapRegion pinRegion) {
+    public MapPolyline searchInPolylines(List<MapPolyline> polylines, MapRegion pinRegion) {
         List<LineSegment> pinRectSegments = makeSegments(pinRegion.makeRect());
 
         for (MapPolyline polyline : polylines) {
@@ -306,7 +319,6 @@ public class PinIntersector {
         return lineSegments;
     }
     //endregion
-
 
     //region ===================== Interfaces ======================
 
